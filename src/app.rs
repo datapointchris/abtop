@@ -97,6 +97,7 @@ pub struct App {
     /// Rate limit poll counter (read every 5 ticks = 10s)
     rate_limit_counter: u32,
     collector: MultiCollector,
+    hidden_agents: Vec<String>,
     /// Cached LLM-generated summaries, keyed by session_id.
     pub summaries: HashMap<String, String>,
     /// Session IDs currently being summarized.
@@ -181,6 +182,7 @@ impl App {
             prev_tokens: HashMap::new(),
             rate_limit_counter: 5,
             collector,
+            hidden_agents: hidden_agents.to_vec(),
             summaries,
             pending_summaries: HashSet::new(),
             summary_retries: HashMap::new(),
@@ -216,6 +218,11 @@ impl App {
             help_open: false,
             view_open: false,
         }
+    }
+
+    /// True when `hidden_agents` names this agent CLI (case-insensitive).
+    pub fn hides_agent(&self, name: &str) -> bool {
+        self.hidden_agents.iter().any(|h| h.eq_ignore_ascii_case(name))
     }
 
     pub fn toggle_help(&mut self) {
