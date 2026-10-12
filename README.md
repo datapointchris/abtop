@@ -124,8 +124,8 @@ Light themes (`light` — Solarized cream, `white` — GitHub-style pure white) 
 
 ```toml
 theme = "btop"
-# Hide specific agent CLIs from the TUI (case-insensitive).
-# Useful if you only use one agent and want a cleaner view.
+# Hide specific agent CLIs from the TUI (case-insensitive), including
+# their quota column. Useful if you only use one agent.
 hidden_agents = ["codex"]
 # Additional Claude Code profile roots to scan.
 # abtop also auto-discovers ~/.claude and ~/.claude-* roots that contain
