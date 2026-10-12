@@ -367,7 +367,7 @@ pub fn draw(f: &mut Frame, app: &App) {
             )),
         ];
         let block = Paragraph::new(msg).alignment(Alignment::Center);
-        let y = h / 2 - 2;
+        let y = (h / 2).saturating_sub(2);
         let msg_area = Rect {
             x: 0,
             y,
