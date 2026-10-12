@@ -482,17 +482,26 @@ impl App {
     }
 
     pub fn cycle_theme(&mut self) {
-        let names = crate::theme::THEME_NAMES;
+        let names = crate::theme::all_names();
         let current = names
             .iter()
-            .position(|&n| n == self.theme.name)
+            .position(|n| n == self.theme.name)
             .unwrap_or(0);
-        let next = (current + 1) % names.len();
-        self.theme = Theme::by_name(names[next]).unwrap_or_default();
-        if let Err(e) = crate::config::save_theme(names[next]) {
-            self.set_status(format!("theme: {} (save failed: {})", names[next], e));
+        let next = &names[(current + 1) % names.len()];
+        self.theme = Theme::resolve(next).unwrap_or_default();
+        if let Err(e) = crate::config::save_theme(next) {
+            self.set_status(format!("theme: {} (save failed: {})", next, e));
         } else {
-            self.set_status(format!("theme: {}", names[next]));
+            self.set_status(format!("theme: {}", next));
+        }
+    }
+
+    /// Re-read the theme the config file names, as btop does on SIGUSR2.
+    pub fn reload_theme(&mut self) {
+        let name = crate::config::load_config().theme;
+        match Theme::resolve(&name) {
+            Some(theme) => self.theme = theme,
+            None => self.set_status(format!("theme: '{}' not found", name)),
         }
     }
 

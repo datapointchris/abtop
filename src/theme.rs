@@ -6,6 +6,20 @@ pub struct Gradient {
     pub end: (u8, u8, u8),
 }
 
+pub struct AgentColors {
+    pub claude: Color,
+    pub codex: Color,
+    pub opencode: Color,
+}
+
+impl AgentColors {
+    pub const BRAND: Self = Self {
+        claude: Color::Rgb(217, 119, 87),   // #D97757 terracotta
+        codex: Color::Rgb(122, 157, 255),   // #7A9DFF periwinkle
+        opencode: Color::Rgb(74, 222, 128), // #4ADE80 emerald
+    };
+}
+
 pub struct Theme {
     pub name: &'static str,
 
@@ -32,6 +46,9 @@ pub struct Theme {
     pub mem_box: Color,
     pub net_box: Color,
     pub proc_box: Color,
+
+    // session list badge per agent CLI
+    pub agent_colors: AgentColors,
 
     // gradients
     pub cpu_grad: Gradient,
@@ -62,7 +79,21 @@ pub const THEME_NAMES: &[&str] = &[
     "tritanopia",
 ];
 
+/// Built-in theme names followed by the user theme files.
+pub fn all_names() -> Vec<String> {
+    THEME_NAMES
+        .iter()
+        .map(|n| n.to_string())
+        .chain(crate::theme_file::names())
+        .collect()
+}
+
 impl Theme {
+    /// A built-in theme, or else `<name>.theme` from the user themes directory.
+    pub fn resolve(name: &str) -> Option<Self> {
+        Self::by_name(name).or_else(|| crate::theme_file::load(name).ok())
+    }
+
     pub fn by_name(name: &str) -> Option<Self> {
         match name {
             "btop" => Some(Self::btop()),
@@ -103,6 +134,7 @@ impl Theme {
             mem_box: Color::Rgb(108, 108, 75),
             net_box: Color::Rgb(92, 88, 141),
             proc_box: Color::Rgb(128, 82, 82),
+            agent_colors: AgentColors::BRAND,
             cpu_grad: Gradient {
                 start: (119, 202, 155),
                 mid: (203, 192, 108),
@@ -152,6 +184,7 @@ impl Theme {
             mem_box: Color::Rgb(189, 147, 249),
             net_box: Color::Rgb(255, 121, 198),
             proc_box: Color::Rgb(255, 85, 85),
+            agent_colors: AgentColors::BRAND,
             cpu_grad: Gradient {
                 start: (80, 250, 123),
                 mid: (241, 250, 140),
@@ -202,6 +235,7 @@ impl Theme {
             mem_box: Color::Rgb(203, 166, 247),
             net_box: Color::Rgb(245, 194, 231),
             proc_box: Color::Rgb(242, 205, 205),
+            agent_colors: AgentColors::BRAND,
             cpu_grad: Gradient {
                 start: (166, 227, 161),
                 mid: (249, 226, 175),
@@ -252,6 +286,7 @@ impl Theme {
             mem_box: Color::Rgb(187, 154, 247),     // magenta #bb9af7
             net_box: Color::Rgb(247, 118, 142),     // red #f7768e
             proc_box: Color::Rgb(255, 158, 100),    // orange #ff9e64
+            agent_colors: AgentColors::BRAND,
             cpu_grad: Gradient {
                 start: (158, 206, 106),
                 mid: (224, 175, 104),
@@ -302,6 +337,7 @@ impl Theme {
             mem_box: Color::Rgb(211, 134, 155),     // bright purple #d3869b
             net_box: Color::Rgb(254, 128, 25),      // bright orange #fe8019
             proc_box: Color::Rgb(251, 73, 52),      // bright red #fb4934
+            agent_colors: AgentColors::BRAND,
             cpu_grad: Gradient {
                 start: (184, 187, 38), // bright green
                 mid: (250, 189, 47),   // bright yellow
@@ -352,6 +388,7 @@ impl Theme {
             mem_box: Color::Rgb(180, 142, 173),     // nord15 purple #b48ead
             net_box: Color::Rgb(208, 135, 112),     // nord12 orange #d08770
             proc_box: Color::Rgb(191, 97, 106),     // nord11 red #bf616a
+            agent_colors: AgentColors::BRAND,
             cpu_grad: Gradient {
                 start: (163, 190, 140),
                 mid: (235, 203, 139),
@@ -403,6 +440,7 @@ impl Theme {
             mem_box: Color::Rgb(108, 113, 196), // violet #6c71c4
             net_box: Color::Rgb(42, 161, 152),  // cyan #2aa198
             proc_box: Color::Rgb(220, 50, 47),  // red
+            agent_colors: AgentColors::BRAND,
             cpu_grad: Gradient {
                 start: (133, 153, 0), // green
                 mid: (181, 137, 0),   // yellow
@@ -454,6 +492,7 @@ impl Theme {
             mem_box: Color::Rgb(130, 80, 223),      // gh purple #8250df
             net_box: Color::Rgb(26, 127, 55),       // gh green
             proc_box: Color::Rgb(207, 34, 46),      // gh red
+            agent_colors: AgentColors::BRAND,
             cpu_grad: Gradient {
                 start: (26, 127, 55), // green
                 mid: (191, 135, 0),   // amber
@@ -506,6 +545,7 @@ impl Theme {
             mem_box: Color::Rgb(255, 255, 255),
             net_box: Color::Rgb(255, 255, 255),
             proc_box: Color::Rgb(255, 255, 255),
+            agent_colors: AgentColors::BRAND,
             cpu_grad: Gradient {
                 start: (0, 255, 255),
                 mid: (255, 255, 255),
@@ -558,6 +598,7 @@ impl Theme {
             mem_box: Color::Rgb(120, 94, 240),
             net_box: Color::Rgb(220, 38, 127),
             proc_box: Color::Rgb(254, 97, 0),
+            agent_colors: AgentColors::BRAND,
             cpu_grad: Gradient {
                 start: (100, 143, 255),
                 mid: (255, 176, 0),
@@ -610,6 +651,7 @@ impl Theme {
             mem_box: Color::Rgb(156, 106, 222),
             net_box: Color::Rgb(255, 194, 10),
             proc_box: Color::Rgb(255, 102, 0),
+            agent_colors: AgentColors::BRAND,
             cpu_grad: Gradient {
                 start: (26, 133, 255),
                 mid: (255, 194, 10),
@@ -661,6 +703,7 @@ impl Theme {
             mem_box: Color::Rgb(198, 120, 221),
             net_box: Color::Rgb(220, 50, 47),
             proc_box: Color::Rgb(255, 140, 144),
+            agent_colors: AgentColors::BRAND,
             cpu_grad: Gradient {
                 start: (64, 196, 208),
                 mid: (255, 140, 144),

@@ -62,6 +62,7 @@ pub mod model;
 pub mod setup;
 pub mod snapshot;
 pub mod theme;
+pub mod theme_file;
 pub mod ui;
 
 use app::{App, JumpOutcome};
@@ -120,27 +121,27 @@ pub fn run() -> io::Result<()> {
                 Some(name) if !name.starts_with('-') => name,
                 Some(name) => {
                     eprintln!("--theme requires a theme name, got '{}'", name);
-                    eprintln!("available: {}", theme::THEME_NAMES.join(", "));
+                    eprintln!("available: {}", theme::all_names().join(", "));
                     std::process::exit(1);
                 }
                 None => {
                     eprintln!("--theme requires a theme name");
-                    eprintln!("available: {}", theme::THEME_NAMES.join(", "));
+                    eprintln!("available: {}", theme::all_names().join(", "));
                     std::process::exit(1);
                 }
             }
         })
         .map(|name| {
-            theme::Theme::by_name(&name).unwrap_or_else(|| {
+            theme::Theme::resolve(&name).unwrap_or_else(|| {
                 eprintln!(
                     "unknown theme '{}'. available: {}",
                     name,
-                    theme::THEME_NAMES.join(", ")
+                    theme::all_names().join(", ")
                 );
                 std::process::exit(1);
             })
         })
-        .or_else(|| theme::Theme::by_name(&cfg.theme));
+        .or_else(|| theme::Theme::resolve(&cfg.theme));
 
     let demo_mode = std::env::args().any(|a| a == "--demo");
     let exit_on_jump = std::env::args().any(|a| a == "--exit-on-jump");
@@ -245,7 +246,20 @@ fn run_app(
     let tick_interval = Duration::from_secs(2);
     let render_interval = Duration::from_millis(500);
 
+    // SIGUSR2 reloads the configured theme, as it does in btop.
+    #[cfg(unix)]
+    let reload_theme = {
+        let flag = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
+        signal_hook::flag::register(signal_hook::consts::SIGUSR2, std::sync::Arc::clone(&flag))?;
+        flag
+    };
+
     loop {
+        #[cfg(unix)]
+        if reload_theme.swap(false, std::sync::atomic::Ordering::Relaxed) {
+            app.reload_theme();
+        }
+
         terminal.draw(|f| ui::draw(f, &app))?;
 
         // Poll at 500ms for smooth animations; data tick every 2s

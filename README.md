@@ -118,6 +118,53 @@ Light themes (`light` — Solarized cream, `white` — GitHub-style pure white) 
 |:-:|:-:|
 | ![light](https://raw.githubusercontent.com/graykode/abtop/main/assets/themes/light.png) | ![white](https://raw.githubusercontent.com/graykode/abtop/main/assets/themes/white.png) |
 
+### Theme files
+
+`theme = "<name>"` also resolves to `~/.config/abtop/themes/<name>.theme`, the way btop's
+`color_theme` resolves to a file in its themes directory. Theme files join the `t` cycle after
+the built-in themes. A built-in name always wins over a file of the same name.
+
+The file uses btop's format and btop's key names, so a btop theme loads as-is:
+
+```text
+theme[main_bg]="#181921"
+theme[main_fg]="#EBDBB2"
+theme[cpu_start]="#7FC678"
+theme[cpu_mid]="#D79921"
+theme[cpu_end]="#CC5351"
+```
+
+Colors are `#RRGGBB`, `#GG` for a grey, or `R G B` in decimal. The empty values mean what they mean
+to btop:
+
+- An empty `main_bg` leaves the terminal's own background.
+- An empty `_mid` ramps straight from start to end.
+- An empty `_end` paints the start color solid.
+
+A missing key keeps the built-in `btop` theme's color. `meter_bg` and `graph_text` fall back to
+`inactive_fg`, and missing `process_*` keys copy `cpu_*`.
+
+abtop reads `main_bg`, `main_fg`, `title`, `hi_fg`, `selected_bg`, `selected_fg`,
+`inactive_fg`, `graph_text`, `meter_bg`, `proc_misc`, `div_line`, the four `*_box` borders, and
+the `cpu_*`, `process_*`, `used_*`, `free_*` and `cached_*` gradients. It adds keys btop does not
+have:
+
+| Key | Colors |
+| --- | --- |
+| `session_id` | Session ids |
+| `status_fg` | Errors and rate limits |
+| `warning_fg` | Warnings |
+| `agent_claude`, `agent_codex`, `agent_opencode` | The agent badge in the session list |
+
+`cpu_*` colors the context and quota meters, and `process_*` colors each session's context
+percentage, so both read as severity scales.
+
+`SIGUSR2` reloads the theme the config file names, as it does in btop:
+
+```bash
+pkill -USR2 -x abtop
+```
+
 ## Configuration
 
 `~/.config/abtop/config.toml` supports:

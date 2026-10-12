@@ -14,6 +14,7 @@ dependencies = [
  "ratatui",
  "serde",
  "serde_json",
+ "signal-hook",
  "sysinfo",
  "tempfile",
  "unicode-width 0.2.0",
