@@ -77,15 +77,17 @@ use ratatui::prelude::*;
 use std::io::{self, stdout};
 use std::time::Duration;
 
-/// Construct a headless `App` from loaded config + theme. Shared by the
+/// Construct an `App` from loaded config + theme. Shared by the TUI and the
 /// `--json` and `--once` entry points.
 fn build_app(theme: theme::Theme, cfg: &config::AppConfig) -> App {
-    App::new_with_config_and_claude_dirs(
+    let mut app = App::new_with_config_and_claude_dirs(
         theme,
         &cfg.hidden_agents,
         cfg.panels,
         &cfg.claude_config_dirs,
-    )
+    );
+    app.summary_model = cfg.summary_model.clone();
+    app
 }
 
 pub fn run() -> io::Result<()> {
@@ -201,9 +203,7 @@ pub fn run() -> io::Result<()> {
         demo_mode,
         initial_theme,
         exit_on_jump,
-        &cfg.hidden_agents,
-        cfg.panels,
-        &cfg.claude_config_dirs,
+        &cfg,
     );
 
     // Always attempt both cleanup steps regardless of app result
@@ -232,16 +232,9 @@ fn run_app(
     demo_mode: bool,
     initial_theme: Option<theme::Theme>,
     exit_on_jump: bool,
-    hidden_agents: &[String],
-    panels: config::PanelVisibility,
-    claude_config_dirs: &[std::path::PathBuf],
+    cfg: &config::AppConfig,
 ) -> io::Result<()> {
-    let mut app = App::new_with_config_and_claude_dirs(
-        initial_theme.unwrap_or_default(),
-        hidden_agents,
-        panels,
-        claude_config_dirs,
-    );
+    let mut app = build_app(initial_theme.unwrap_or_default(), cfg);
     if demo_mode {
         demo::populate_demo(&mut app);
     } else {

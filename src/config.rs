@@ -37,6 +37,9 @@ pub struct AppConfig {
     /// UI language override. Empty string means auto-detect from `LANG`.
     /// Recognized values: "en", "zh" (anything starting with "zh" maps to Simplified Chinese).
     pub language: String,
+    /// `--model` for the `claude --print` session-title call. Empty string
+    /// leaves the choice to Claude Code.
+    pub summary_model: String,
 }
 
 impl Default for AppConfig {
@@ -47,6 +50,7 @@ impl Default for AppConfig {
             claude_config_dirs: Vec::new(),
             panels: PanelVisibility::default(),
             language: String::new(),
+            summary_model: String::new(),
         }
     }
 }
@@ -97,6 +101,7 @@ fn parse_config_body(content: &str) -> AppConfig {
             match key {
                 "theme" => config.theme = val.to_string(),
                 "language" => config.language = val.to_string(),
+                "summary_model" => config.summary_model = val.to_string(),
                 "show_context" => config.panels.context = parse_bool(val).unwrap_or(true),
                 "show_quota" => config.panels.quota = parse_bool(val).unwrap_or(true),
                 "show_tokens" => config.panels.tokens = parse_bool(val).unwrap_or(true),

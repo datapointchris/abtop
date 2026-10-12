@@ -245,6 +245,8 @@ Current task (2nd line under each session):
 ## Session Summary Generation
 
 Each session gets a one-line summary title generated via `claude --print`:
+- Runs with `--safe-mode`, no tools, no MCP, no CLAUDE.md or memory, and no saved session, so a title costs hundreds of tokens rather than thousands and fires none of the user's hooks
+- `summary_model` in config.toml passes `--model`; unset leaves the model to Claude Code's settings
 - Spawned as background process with 10s timeout
 - Rejects generic/empty output; falls back to sanitized first prompt (28 chars)
 - Cached to `~/.cache/abtop/summaries.json` (persists across runs)

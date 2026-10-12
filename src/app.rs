@@ -98,6 +98,8 @@ pub struct App {
     rate_limit_counter: u32,
     collector: MultiCollector,
     hidden_agents: Vec<String>,
+    /// `--model` for summary generation; empty leaves it to Claude Code.
+    pub summary_model: String,
     /// Cached LLM-generated summaries, keyed by session_id.
     pub summaries: HashMap<String, String>,
     /// Session IDs currently being summarized.
@@ -183,6 +185,7 @@ impl App {
             rate_limit_counter: 5,
             collector,
             hidden_agents: hidden_agents.to_vec(),
+            summary_model: String::new(),
             summaries,
             pending_summaries: HashSet::new(),
             summary_retries: HashMap::new(),
@@ -598,8 +601,9 @@ impl App {
                 let prompt = s.initial_prompt.clone();
                 let assistant_text = s.first_assistant_text.clone();
                 let tx = self.summary_tx.clone();
+                let model = self.summary_model.clone();
                 std::thread::spawn(move || {
-                    let result = generate_summary(&prompt, &assistant_text);
+                    let result = generate_summary(&prompt, &assistant_text, &model);
                     let fallback_text = if prompt.is_empty() {
                         assistant_text
                     } else {
@@ -849,7 +853,7 @@ impl App {
 
 /// Call `claude --print` via stdin pipe to summarize a prompt.
 /// Returns `None` on timeout so the caller can retry later.
-fn generate_summary(prompt: &str, assistant_text: &str) -> Option<String> {
+fn generate_summary(prompt: &str, assistant_text: &str, model: &str) -> Option<String> {
     use std::io::Write;
     use std::process::{Command, Stdio};
     use std::time::Duration;
@@ -874,8 +878,26 @@ fn generate_summary(prompt: &str, assistant_text: &str) -> Option<String> {
         context
     );
 
-    let mut child = match Command::new("claude")
-        .args(["--print", "-"])
+    // A title needs no tools, project context, memory, hooks or MCP. Loading
+    // them costs thousands of cached tokens per call and fires the user's hooks.
+    let mut cmd = Command::new("claude");
+    cmd.args([
+        "--print",
+        "-",
+        "--safe-mode",
+        "--tools",
+        "",
+        "--strict-mcp-config",
+        "--no-session-persistence",
+        "--system-prompt",
+        "You write short, specific titles for coding sessions.",
+    ])
+    .env("CLAUDE_CODE_DISABLE_CLAUDE_MDS", "1")
+    .env("CLAUDE_CODE_DISABLE_AUTO_MEMORY", "1");
+    if !model.is_empty() {
+        cmd.args(["--model", model]);
+    }
+    let mut child = match cmd
         .current_dir(std::env::temp_dir())
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())

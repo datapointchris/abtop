@@ -127,6 +127,9 @@ theme = "btop"
 # Hide specific agent CLIs from the TUI (case-insensitive), including
 # their quota column. Useful if you only use one agent.
 hidden_agents = ["codex"]
+# Model for the `claude --print` call that titles each session.
+# Omit to use the model your Claude Code settings select.
+summary_model = "claude-sonnet-5-5"
 # Additional Claude Code profile roots to scan.
 # abtop also auto-discovers ~/.claude and ~/.claude-* roots that contain
 # both sessions/ and projects/.
