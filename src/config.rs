@@ -55,8 +55,20 @@ impl Default for AppConfig {
     }
 }
 
+/// `~/.config/abtop` on macOS too, matching Linux and the README.
+pub fn dir() -> Option<PathBuf> {
+    #[cfg(unix)]
+    let base = std::env::var_os("XDG_CONFIG_HOME")
+        .map(PathBuf::from)
+        .filter(|p| p.is_absolute())
+        .or_else(|| dirs::home_dir().map(|h| h.join(".config")));
+    #[cfg(not(unix))]
+    let base = dirs::config_dir();
+    base.map(|d| d.join("abtop"))
+}
+
 fn config_path() -> Option<PathBuf> {
-    dirs::config_dir().map(|d| d.join("abtop").join("config.toml"))
+    dir().map(|d| d.join("config.toml"))
 }
 
 pub fn load_config() -> AppConfig {

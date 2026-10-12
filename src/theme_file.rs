@@ -1,4 +1,4 @@
-//! User themes: `<config dir>/abtop/themes/<name>.theme`, so `theme = "<name>"`
+//! User themes: `~/.config/abtop/themes/<name>.theme`, so `theme = "<name>"`
 //! resolves the way btop's `color_theme` does. The file uses btop's theme
 //! format and btop's key names, so a btop theme loads as-is. abtop's own keys
 //! are `session_id`, `status_fg`, `warning_fg` and `agent_claude`,
@@ -13,7 +13,7 @@ use ratatui::style::Color;
 use crate::theme::{AgentColors, Gradient, Theme, THEME_NAMES};
 
 pub fn themes_dir() -> Option<PathBuf> {
-    dirs::config_dir().map(|d| d.join("abtop").join("themes"))
+    crate::config::dir().map(|d| d.join("themes"))
 }
 
 fn path_of(name: &str) -> Option<PathBuf> {
