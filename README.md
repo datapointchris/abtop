@@ -2,6 +2,11 @@
 
 **Like [btop](https://github.com/aristocratos/btop), but for your AI coding agents.**
 
+> This is a fork of [graykode/abtop](https://github.com/graykode/abtop). It adds
+> [theme files](#theme-files) in btop's format, a `summary_model` setting with a
+> lighter `claude --print` call for session titles, and a quota panel that drops
+> the columns of agents in `hidden_agents`. Everything else follows upstream.
+
 See every Claude Code, Codex CLI, and OpenCode session at a glance — token usage, context window %, rate limits, child processes, open ports, and more.
 Claude Code, Codex CLI, and OpenCode sessions are discovered from local process/file state, so multiple active profiles are supported across macOS, Linux, and Windows.
 
@@ -24,13 +29,13 @@ All read-only. No API keys. No auth.
 > On Linux, ensure `sqlite3` is installed to enable monitoring for OpenCode sessions.
 
 ```bash
-curl --proto '=https' --tlsv1.2 -LsSf https://github.com/graykode/abtop/releases/latest/download/abtop-installer.sh | sh
+curl --proto '=https' --tlsv1.2 -LsSf https://github.com/datapointchris/abtop/releases/latest/download/abtop-installer.sh | sh
 ```
 
 ### Cargo
 
 ```bash
-cargo install abtop
+cargo install --git https://github.com/datapointchris/abtop
 ```
 
 ### Windows
@@ -38,14 +43,14 @@ cargo install abtop
 Native support — no WSL required. Uses `sysinfo` for process info and host CPU/MEM metrics, and `netstat -ano` for listening ports. Windows has no load average, so LOAD is reported as 0. OpenCode session discovery additionally requires the `sqlite3` CLI (`winget install SQLite.SQLite`); without it abtop prints a one-time warning to stderr.
 
 ```powershell
-powershell -c "irm https://github.com/graykode/abtop/releases/latest/download/abtop-installer.ps1 | iex"
+powershell -c "irm https://github.com/datapointchris/abtop/releases/latest/download/abtop-installer.ps1 | iex"
 ```
 
-Or `cargo install abtop` from any terminal with Git in PATH. Claude Code config is resolved automatically from `%USERPROFILE%\.claude`.
+Or `cargo install --git https://github.com/datapointchris/abtop` from any terminal with Git in PATH. Claude Code config is resolved automatically from `%USERPROFILE%\.claude`.
 
 ### Other
 
-Pre-built binaries for all platforms are available on the [GitHub Releases](https://github.com/graykode/abtop/releases) page.
+Pre-built binaries for all platforms are available on the [GitHub Releases](https://github.com/datapointchris/abtop/releases) page.
 
 ## Usage
 
