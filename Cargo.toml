@@ -2,7 +2,7 @@
 name = "abtop"
 # A fork release bumps the patch and keeps the -fork suffix. Version checks that
 # drop the suffix would read 0.5.5-fork.1 and 0.5.5-fork.2 as the same version.
-version = "0.5.6-fork.1"
+version = "0.5.7-fork.1"
 edition = "2021"
 rust-version = "1.88"
 description = "AI agent monitor for your terminal"
