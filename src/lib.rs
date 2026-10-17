@@ -246,9 +246,9 @@ fn run_app(
     let tick_interval = Duration::from_secs(2);
     let render_interval = Duration::from_millis(500);
 
-    // SIGUSR2 reloads the configured theme, as it does in btop.
+    // SIGUSR2 reloads the config file, as it reloads the theme in btop.
     #[cfg(unix)]
-    let reload_theme = {
+    let reload_config = {
         let flag = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
         signal_hook::flag::register(signal_hook::consts::SIGUSR2, std::sync::Arc::clone(&flag))?;
         flag
@@ -256,8 +256,8 @@ fn run_app(
 
     loop {
         #[cfg(unix)]
-        if reload_theme.swap(false, std::sync::atomic::Ordering::Relaxed) {
-            app.reload_theme();
+        if reload_config.swap(false, std::sync::atomic::Ordering::Relaxed) {
+            app.reload_config();
         }
 
         terminal.draw(|f| ui::draw(f, &app))?;

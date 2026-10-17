@@ -253,7 +253,6 @@ impl App {
             7 => self.show_mcp = !self.show_mcp,
             _ => return,
         }
-        self.persist_panel_visibility();
         self.clamp_narrow_tab();
     }
 
@@ -269,21 +268,6 @@ impl App {
             "off"
         };
         self.set_status(format!("mcp session suppression: {}", label));
-    }
-
-    fn persist_panel_visibility(&mut self) {
-        let panels = crate::config::PanelVisibility {
-            context: self.show_context,
-            quota: self.show_quota,
-            tokens: self.show_tokens,
-            projects: self.show_projects,
-            ports: self.show_ports,
-            sessions: self.show_sessions,
-            mcp: self.show_mcp,
-        };
-        if let Err(e) = crate::config::save_panel_visibility(&panels) {
-            self.set_status(format!("panels save failed: {}", e));
-        }
     }
 
     pub fn toggle_file_audit(&mut self) {
@@ -326,7 +310,6 @@ impl App {
             7 => self.show_mcp = !self.show_mcp,
             _ => return,
         }
-        self.persist_panel_visibility();
         self.clamp_narrow_tab();
     }
 
@@ -489,19 +472,26 @@ impl App {
             .unwrap_or(0);
         let next = &names[(current + 1) % names.len()];
         self.theme = Theme::resolve(next).unwrap_or_default();
-        if let Err(e) = crate::config::save_theme(next) {
-            self.set_status(format!("theme: {} (save failed: {})", next, e));
-        } else {
-            self.set_status(format!("theme: {}", next));
-        }
+        self.set_status(format!("theme: {}", next));
     }
 
-    /// Re-read the theme the config file names, as btop does on SIGUSR2.
-    pub fn reload_theme(&mut self) {
-        let name = crate::config::load_config().theme;
-        match Theme::resolve(&name) {
+    /// Re-apply the theme, panels and summary model the config file sets,
+    /// dropping any change made with a key since. Agents and Claude config
+    /// directories build the collectors, so those take a restart.
+    pub fn reload_config(&mut self) {
+        let cfg = crate::config::load_config();
+        self.show_context = cfg.panels.context;
+        self.show_quota = cfg.panels.quota;
+        self.show_tokens = cfg.panels.tokens;
+        self.show_projects = cfg.panels.projects;
+        self.show_ports = cfg.panels.ports;
+        self.show_sessions = cfg.panels.sessions;
+        self.show_mcp = cfg.panels.mcp;
+        self.clamp_narrow_tab();
+        self.summary_model = cfg.summary_model;
+        match Theme::resolve(&cfg.theme) {
             Some(theme) => self.theme = theme,
-            None => self.set_status(format!("theme: '{}' not found", name)),
+            None => self.set_status(format!("theme: '{}' not found", cfg.theme)),
         }
     }
 

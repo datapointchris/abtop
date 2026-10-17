@@ -97,7 +97,7 @@ OpenCode support reads the local SQLite database at `~/.local/share/opencode/ope
 
 ## Themes
 
-12 built-in themes, including 4 colorblind-friendly options (`high-contrast`, `protanopia`, `deuteranopia`, `tritanopia`). Press `t` to cycle at runtime, or launch with `--theme <name>`. Your choice is saved to `~/.config/abtop/config.toml`.
+12 built-in themes, including 4 colorblind-friendly options (`high-contrast`, `protanopia`, `deuteranopia`, `tritanopia`). Press `t` to cycle at runtime, or launch with `--theme <name>`. Set `theme` in `~/.config/abtop/config.toml` to keep one.
 
 | btop (default) | dracula | catppuccin |
 |:-:|:-:|:-:|
@@ -164,7 +164,7 @@ have:
 `cpu_*` colors the context and quota meters, and `process_*` colors each session's context
 percentage, so both read as severity scales.
 
-`SIGUSR2` reloads the theme the config file names, as it does in btop:
+A theme generator writes the file and sends `SIGUSR2`, which reloads the config file:
 
 ```bash
 pkill -USR2 -x abtop
@@ -172,10 +172,24 @@ pkill -USR2 -x abtop
 
 ## Configuration
 
-`~/.config/abtop/config.toml` supports:
+abtop reads `~/.config/abtop/config.toml` and never writes it. A theme picked with `t` and a panel
+toggled with `1`–`7` last until abtop exits. To keep one, set it in the file.
+
+`SIGUSR2` re-applies the file's `theme`, `show_*` and `summary_model`, dropping any change made
+with a key since. `hidden_agents` and `claude_config_dirs` take a restart.
+
+The file supports:
 
 ```toml
 theme = "btop"
+# Panels, toggled at runtime with 1-7. All default to true.
+show_context = true
+show_quota = true
+show_tokens = true
+show_projects = true
+show_ports = true
+show_sessions = true
+show_mcp = true
 # Hide specific agent CLIs from the TUI (case-insensitive), including
 # their quota column. Useful if you only use one agent.
 hidden_agents = ["codex"]
