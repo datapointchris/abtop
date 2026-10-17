@@ -190,8 +190,12 @@ pub fn save_panel_visibility(panels: &PanelVisibility) -> Result<(), String> {
 /// Read the config, replace or append each (key, value) pair, write it back.
 /// Lines that don't match any key are preserved verbatim so unknown keys and
 /// comments survive saves driven by unrelated parts of the UI.
+/// A symlinked config belongs to a config repo, so it is never written.
 fn write_with_updates(updates: &[(&str, String)]) -> Result<(), String> {
     let path = config_path().ok_or("no config directory")?;
+    if path.is_symlink() {
+        return Err("config.toml is a symlink".to_string());
+    }
     if let Some(parent) = path.parent() {
         std::fs::create_dir_all(parent).map_err(|e| e.to_string())?;
     }
